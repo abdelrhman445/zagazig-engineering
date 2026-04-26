@@ -1,0 +1,27 @@
+const mongoose = require('mongoose');
+
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      // These options are set by default in Mongoose 8+, listed here for clarity
+      // useNewUrlParser and useUnifiedTopology are no longer needed
+    });
+
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+
+    // Handle connection events
+    mongoose.connection.on('disconnected', () => {
+      console.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('✅ MongoDB reconnected.');
+    });
+
+  } catch (error) {
+    console.error(`❌ MongoDB connection error: ${error.message}`);
+    process.exit(1); // Exit process with failure
+  }
+};
+
+module.exports = connectDB;
