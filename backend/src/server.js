@@ -23,31 +23,35 @@ const app = express();
 // -------------------------------------------------------
 
 /**
- * إعدادات الـ CORS المحدثة:
- * تم استخدام دالة التحقق لضمان تنظيف الروابط من المسافات الزائدة
- * وللسماح بالوصول من الفرونت إند المرفوع على Vercel بشكل آمن.
+ * إعدادات الـ CORS الاحترافية باستخدام .env
+ * تقوم بمعالجة الروابط لضمان عدم وجود مسافات أو "/" زائدة تعيق عملية التحقق
  */
 const corsOptions = {
   origin: function (origin, callback) {
-    // السماح بالطلبات التي ليس لها origin (مثل تطبيقات الموبايل أو Postman أو السيرفرات)
+    // السماح بالطلبات التي ليس لها origin (مثل Postman أو السيرفرات)
     if (!origin) return callback(null, true);
 
-    const allowedOrigins = process.env.ALLOWED_ORIGINS 
-      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) 
+    // تحويل سلسلة الروابط من .env إلى مصفوفة نظيفة تماماً
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',').map(url => url.trim().replace(/\/$/, ''))
       : [];
 
-    // في وضع التطوير (development) اسمح بكل شيء، في الإنتاج (production) تحقق من القائمة المسموحة
-    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes(origin)) {
+    // تنظيف الرابط القادم من المتصفح أيضاً للمقارنة الدقيقة
+    const cleanedOrigin = origin.replace(/\/$/, '');
+
+    // التحقق: السماح في وضع التطوير أو إذا كان الرابط موجوداً في القائمة المسموحة
+    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes(cleanedOrigin)) {
       callback(null, true);
     } else {
-      console.error(`CORS Error: Origin ${origin} not allowed by Zag Drives API`);
+      // طباعة الخطأ في الـ Logs لمعرفة الرابط المرفوض بالضبط
+      console.error(`❌ CORS Error: Origin ${origin} is not allowed by configuration.`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
-  optionsSuccessStatus: 200 // لضمان التوافق مع بعض المتصفحات القديمة
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -108,9 +112,9 @@ const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`\n🚀 Zag Drives API is running`);
-  console.log(`   ➜ Mode:     ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   ➜ Port:     ${PORT}`);
-  console.log(`   ➜ URL:      http://localhost:${PORT}\n`);
+  console.log(`   ➜ Mode:      ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   ➜ Port:      ${PORT}`);
+  console.log(`   ➜ URL:       http://localhost:${PORT}\n`);
 });
 
 // -------------------------------------------------------
