@@ -7,13 +7,19 @@ const Link = require('../models/Link');
 // -------------------------------------------------------
 const getAllLinks = async (req, res, next) => {
   try {
-    const { category, search, page = 1, limit = 20 } = req.query;
+    // 1. استخراج year من الـ query
+    const { category, year, search, page = 1, limit = 20 } = req.query;
 
     // Build filter object
     const filter = { isActive: true };
 
     if (category) {
       filter.category = category;
+    }
+
+    // 2. إضافة فلتر السنة الدراسية عشان الفلتر في لوحة التحكم يشتغل
+    if (year) {
+      filter.year = year;
     }
 
     // Text search across title and description
@@ -99,9 +105,9 @@ const getCategories = async (req, res, next) => {
 // -------------------------------------------------------
 const createLink = async (req, res, next) => {
   try {
-    const { title, url, category, description } = req.body;
+    const { title, url, category, year, description } = req.body;
 
-    const link = await Link.create({ title, url, category, description });
+    const link = await Link.create({ title, url, category, year, description });
 
     res.status(201).json({
       success: true,
@@ -129,13 +135,17 @@ const createLink = async (req, res, next) => {
 // -------------------------------------------------------
 const updateLink = async (req, res, next) => {
   try {
-    const { title, url, category, description, isActive } = req.body;
+    const { title, url, category, year, description, isActive } = req.body;
 
     // Build update payload from only provided fields
     const updateData = {};
     if (title !== undefined) updateData.title = title;
     if (url !== undefined) updateData.url = url;
     if (category !== undefined) updateData.category = category;
+    
+    // 3. السطر ده كان ناقص، وده اللي كان بيمنع تعديل السنة الدراسية!
+    if (year !== undefined) updateData.year = year; 
+    
     if (description !== undefined) updateData.description = description;
     if (isActive !== undefined) updateData.isActive = isActive;
 

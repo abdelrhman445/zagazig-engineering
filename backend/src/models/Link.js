@@ -11,6 +11,15 @@ const CATEGORIES = [
   'Other',
 ];
 
+// السنين الدراسية المسموحة (نفس التي وضعناها في الـ Frontend)
+const ACADEMIC_YEARS = [
+  "الفرقة الأولى",
+  "الفرقة الثانية",
+  "الفرقة الثالثة",
+  "الفرقة الرابعة",
+  "عام / مشترك"
+];
+
 // URL validation regex (supports http, https, ftp)
 const URL_REGEX =
   /^(https?:\/\/)(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
@@ -44,6 +53,15 @@ const linkSchema = new mongoose.Schema(
         message: `Category must be one of: ${CATEGORIES.join(', ')}`,
       },
     },
+    // تم تحسين حقل السنة الدراسية هنا
+    year: {
+      type: String,
+      required: [true, 'Academic year is required'], // رسالة خطأ واضحة
+      enum: {
+        values: ACADEMIC_YEARS, // تحديد القيم المسموحة فقط
+        message: `Year must be one of: ${ACADEMIC_YEARS.join(', ')}`,
+      },
+    },
     description: {
       type: String,
       trim: true,
@@ -64,11 +82,17 @@ const linkSchema = new mongoose.Schema(
 
 // --- Index for faster queries ---
 linkSchema.index({ category: 1 });
+linkSchema.index({ year: 1 }); // تم إضافة Index للـ year لتسريع الفلترة
 linkSchema.index({ title: 'text', description: 'text' }); // Text search index
 
 // --- Static: expose allowed categories ---
 linkSchema.statics.getCategories = function () {
   return CATEGORIES;
+};
+
+// إتاحة الوصول للسنين الدراسية أيضاً إذا احتجتها لاحقاً في الـ API
+linkSchema.statics.getAcademicYears = function () {
+  return ACADEMIC_YEARS;
 };
 
 const Link = mongoose.model('Link', linkSchema);

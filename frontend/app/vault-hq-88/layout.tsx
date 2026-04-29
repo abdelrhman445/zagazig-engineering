@@ -6,14 +6,14 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, PlusCircle, LogOut, BookOpenCheck,
-  ChevronRight, Menu, X, Shield
+  ChevronLeft, Menu, X, Shield // تم استبدال ChevronRight بـ ChevronLeft
 } from "lucide-react";
 import { getToken, clearToken } from "@/lib/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV_ITEMS = [
-  { href: "/vault-hq-88",      label: "Dashboard",  icon: <LayoutDashboard size={17} /> },
-  { href: "/vault-hq-88/new",  label: "Add Link",   icon: <PlusCircle size={17} /> },
+  { href: "/vault-hq-88",      label: "لوحة التحكم",  icon: <LayoutDashboard size={17} /> },
+  { href: "/vault-hq-88/new",  label: "إضافة رابط",   icon: <PlusCircle size={17} /> },
 ];
 
 export default function VaultLayout({ children }: { children: React.ReactNode }) {
@@ -32,11 +32,13 @@ export default function VaultLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
+    // تفعيل الـ RTL
+    <div className="flex min-h-[calc(100vh-4rem)]" dir="rtl">
 
       {/* ── DESKTOP SIDEBAR ──────────────────────────────────── */}
-      <aside className="hidden md:flex flex-col w-60 border-r border-[var(--border-subtle)]
-                        bg-[var(--bg-secondary)] flex-shrink-0 fixed top-16 bottom-0 left-0 z-30">
+      {/* تعديل border-r إلى border-l و left-0 إلى right-0 */}
+      <aside className="hidden md:flex flex-col w-60 border-l border-[var(--border-subtle)]
+                        bg-[var(--bg-secondary)] flex-shrink-0 fixed top-16 bottom-0 right-0 z-30">
         {/* Brand strip */}
         <div className="px-5 py-5 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-2.5">
@@ -44,9 +46,8 @@ export default function VaultLayout({ children }: { children: React.ReactNode })
               <Shield size={14} className="text-white" />
             </div>
             <div>
-              <p className="text-[var(--text-primary)] text-sm font-semibold leading-none">Admin Panel</p>
-              <p className="text-[var(--text-muted)] text-[11px] font-mono mt-0.5">vault-hq-88</p>
-            </div>
+              <p className="text-[var(--text-primary)] text-sm font-semibold leading-none">لوحة الإدارة</p>
+                </div>
           </div>
         </div>
 
@@ -65,9 +66,10 @@ export default function VaultLayout({ children }: { children: React.ReactNode })
                 {active && (
                   <motion.span
                     layoutId="active-pill"
-                    className="ml-auto"
+                    // تعديل ml-auto إلى mr-auto
+                    className="mr-auto"
                   >
-                    <ChevronRight size={14} />
+                    <ChevronLeft size={14} />
                   </motion.span>
                 )}
               </Link>
@@ -77,13 +79,14 @@ export default function VaultLayout({ children }: { children: React.ReactNode })
 
         {/* Bottom: logout + theme */}
         <div className="px-3 py-4 border-t border-[var(--border-subtle)] flex flex-col gap-2">
-          <ThemeToggle />
+          
           <button
             onClick={logout}
-            className="sidebar-link w-full text-left hover:bg-red-500/10 hover:text-red-400"
+            // تعديل text-left إلى text-right
+            className="sidebar-link w-full text-right hover:bg-red-500/10 hover:text-red-400"
           >
             <LogOut size={17} />
-            Sign Out
+            تسجيل الخروج
           </button>
         </div>
       </aside>
@@ -126,17 +129,19 @@ export default function VaultLayout({ children }: { children: React.ReactNode })
             ))}
             <button
               onClick={logout}
-              className="sidebar-link text-left hover:bg-red-500/10 hover:text-red-400"
+              // تعديل text-left إلى text-right
+              className="sidebar-link text-right hover:bg-red-500/10 hover:text-red-400"
             >
               <LogOut size={17} />
-              Sign Out
+              تسجيل الخروج
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* ── MAIN CONTENT ─────────────────────────────────────── */}
-      <div className="flex-1 md:ml-60 pt-12 md:pt-0 w-full">
+      {/* تعديل md:ml-60 إلى md:mr-60 لإفساح المجال للقائمة الجانبية من اليمين */}
+      <div className="flex-1 md:mr-60 pt-12 md:pt-0 w-full">
         <div className="p-6 sm:p-8 page-enter">
           {children}
         </div>

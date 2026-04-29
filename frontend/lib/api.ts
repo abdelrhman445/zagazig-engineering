@@ -61,6 +61,7 @@ export interface Link {
   title: string;
   url: string;
   category: string;
+  year?: string;
   description: string;
   isActive: boolean;
   createdAt: string;
@@ -98,6 +99,7 @@ export const extractError = (err: unknown): string => {
 // ─── Public API Calls ─────────────────────────────────────────
 export const fetchLinks = async (params?: {
   category?: string;
+  year?: string; 
   search?: string;
   page?: number;
   limit?: number;
@@ -129,6 +131,7 @@ export const createLink = async (data: {
   title: string;
   url: string;
   category: string;
+  year: string;
   description?: string;
 }): Promise<Link> => {
   const res = await api.post<{ success: boolean; data: { link: Link } }>("/links", data);
@@ -146,3 +149,4 @@ export const updateLink = async (
 export const deleteLink = async (id: string): Promise<void> => {
   await api.delete(`/links/${id}`);
 };
+

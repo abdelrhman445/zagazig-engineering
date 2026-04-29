@@ -26,7 +26,7 @@ export default function GatePage() {
     setError(null);
 
     if (!username.trim() || !password.trim()) {
-      setError("Please fill in all fields.");
+      setError("يرجى ملء جميع الحقول.");
       return;
     }
 
@@ -44,7 +44,8 @@ export default function GatePage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 relative overflow-hidden">
+    // إضافة dir="rtl" لتفعيل الاتجاه من اليمين لليسار
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 relative overflow-hidden" dir="rtl">
       {/* Background glow */}
       <div
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -76,10 +77,9 @@ export default function GatePage() {
               <ShieldCheck size={26} className="text-white" />
             </motion.div>
             <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1.5">
-              Restricted Access
-            </h1>
+              Admin            </h1>
             <p className="text-[var(--text-secondary)] text-sm">
-              Authorized personnel only
+              تسجيل الدخول لصفحة التحكم
             </p>
           </div>
 
@@ -88,7 +88,7 @@ export default function GatePage() {
             {/* Username */}
             <div className="flex flex-col gap-2">
               <label className="text-[var(--text-secondary)] text-sm font-medium">
-                Username
+                اسم المستخدم
               </label>
               <input
                 type="text"
@@ -99,13 +99,14 @@ export default function GatePage() {
                 placeholder="admin"
                 disabled={loading || success}
                 className="input-field"
+                style={{ paddingRight: "16px", paddingLeft: "16px" }}
               />
             </div>
 
             {/* Password */}
             <div className="flex flex-col gap-2">
               <label className="text-[var(--text-secondary)] text-sm font-medium">
-                Password
+                كلمة المرور
               </label>
               <div className="relative">
                 <input
@@ -115,18 +116,21 @@ export default function GatePage() {
                   autoComplete="current-password"
                   placeholder="••••••••"
                   disabled={loading || success}
-                  className="input-field pr-11"
+                  className="input-field w-full"
+                  // فرض المسافة من اليسار لأيقونة العين ومن اليمين لبداية النص
+                  style={{ paddingLeft: "44px", paddingRight: "16px" }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
                   disabled={loading || success}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2
+                  // نقل الأيقونة لليسار بدلاً من اليمين لتناسب الـ RTL
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2
                              text-[var(--text-muted)] hover:text-[var(--text-secondary)]
                              transition-colors"
-                  aria-label={showPass ? "Hide password" : "Show password"}
+                  aria-label={showPass ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                 >
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -140,7 +144,7 @@ export default function GatePage() {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="flex items-start gap-2.5 px-3.5 py-3 rounded-xl
-                             bg-red-950/50 border border-red-800/60 text-red-400 text-sm"
+                             bg-red-950/50 border border-red-800/60 text-red-400 text-sm overflow-hidden"
                 >
                   <AlertCircle size={15} className="flex-shrink-0 mt-0.5" />
                   {error}
@@ -152,10 +156,10 @@ export default function GatePage() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   className="flex items-center gap-2.5 px-3.5 py-3 rounded-xl
-                             bg-green-950/50 border border-green-800/60 text-green-400 text-sm"
+                             bg-green-950/50 border border-green-800/60 text-green-400 text-sm overflow-hidden"
                 >
                   <ShieldCheck size={15} className="flex-shrink-0" />
-                  Access granted — redirecting...
+                  تم منح الصلاحية — جاري التحويل...
                 </motion.div>
               )}
             </AnimatePresence>
@@ -173,18 +177,18 @@ export default function GatePage() {
             >
               {loading ? (
                 <>
-                  <Loader2 size={17} className="animate-spin" />
-                  Verifying...
+                  <Loader2 size={18} className="animate-spin" />
+                  جاري التحقق...
                 </>
               ) : success ? (
                 <>
-                  <ShieldCheck size={17} />
-                  Access Granted
+                  <ShieldCheck size={18} />
+                  تم منح الصلاحية
                 </>
               ) : (
                 <>
-                  <LogIn size={17} />
-                  Authenticate
+                  <LogIn size={18} />
+                  تسجيل الدخول
                 </>
               )}
             </motion.button>
@@ -192,13 +196,13 @@ export default function GatePage() {
 
           {/* Subtle security note */}
           <p className="text-center text-xs text-[var(--text-muted)] mt-6 font-mono">
-            session is encrypted · do not share credentials
+            اي اللي جايبك هنا يا صحبي كدا كدا حركتك متسجلة
           </p>
         </div>
 
-        {/* Decorative corner lines */}
-        <div className="absolute -top-px -left-px w-8 h-8 border-t-2 border-l-2 border-[var(--accent-primary)] rounded-tl-2xl opacity-50" />
-        <div className="absolute -bottom-px -right-px w-8 h-8 border-b-2 border-r-2 border-[var(--accent-primary)] rounded-br-2xl opacity-50" />
+        {/* Decorative corner lines (تم عكسها لتعطي جمالية متناسقة مع الاتجاه العربي) */}
+        <div className="absolute -top-px -right-px w-8 h-8 border-t-2 border-r-2 border-[var(--accent-primary)] rounded-tr-2xl opacity-50" />
+        <div className="absolute -bottom-px -left-px w-8 h-8 border-b-2 border-l-2 border-[var(--accent-primary)] rounded-bl-2xl opacity-50" />
       </motion.div>
     </div>
   );

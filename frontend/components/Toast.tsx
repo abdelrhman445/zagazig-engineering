@@ -34,9 +34,10 @@ function SingleToast({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: 80, scale: 0.85 }}
+      // تعديل اتجاه الدخول والخروج ليأتي من اليسار (x: -80) بدلاً من اليمين
+      initial={{ opacity: 0, x: -80, scale: 0.85 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 80, scale: 0.85 }}
+      exit={{ opacity: 0, x: -80, scale: 0.85 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       className={`flex items-start gap-3 px-4 py-3.5 rounded-xl text-sm font-medium
                   shadow-2xl min-w-[280px] max-w-[380px]
@@ -51,7 +52,7 @@ function SingleToast({
       <button
         onClick={() => onDismiss(toast.id)}
         className="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity"
-        aria-label="Dismiss"
+        aria-label="إغلاق" // تمت الترجمة
       >
         <X size={14} />
       </button>
@@ -61,7 +62,9 @@ function SingleToast({
 
 export function ToastContainer({ toasts, onDismiss }: ToastProps) {
   return (
-    <div className="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 items-end">
+    // تعديل right-5 إلى left-5 لتظهر الإشعارات على اليسار
+    // وإضافة dir="rtl" مع items-end لتتم محاذاتها بشكل صحيح لليسار في النظام العربي
+    <div className="fixed bottom-5 left-5 z-[9999] flex flex-col gap-2 items-end" dir="rtl">
       <AnimatePresence mode="popLayout">
         {toasts.map((t) => (
           <SingleToast key={t.id} toast={t} onDismiss={onDismiss} />
