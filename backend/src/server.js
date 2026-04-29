@@ -22,15 +22,34 @@ const app = express();
 // Global Middleware
 // -------------------------------------------------------
 
-// CORS — configure allowed origins for your frontend
+/**
+ * إعدادات الـ CORS المحدثة:
+ * تم استخدام دالة التحقق لضمان تنظيف الروابط من المسافات الزائدة
+ * وللسماح بالوصول من الفرونت إند المرفوع على Vercel بشكل آمن.
+ */
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.ALLOWED_ORIGINS?.split(',') || []
-    : '*', // Allow all origins in development
+  origin: function (origin, callback) {
+    // السماح بالطلبات التي ليس لها origin (مثل تطبيقات الموبايل أو Postman أو السيرفرات)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = process.env.ALLOWED_ORIGINS 
+      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) 
+      : [];
+
+    // في وضع التطوير (development) اسمح بكل شيء، في الإنتاج (production) تحقق من القائمة المسموحة
+    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.error(`CORS Error: Origin ${origin} not allowed by Zag Drives API`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
+  optionsSuccessStatus: 200 // لضمان التوافق مع بعض المتصفحات القديمة
 };
+
 app.use(cors(corsOptions));
 
 // Parse incoming JSON request bodies
@@ -89,9 +108,9 @@ const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`\n🚀 Zag Drives API is running`);
-  console.log(`   ➜ Mode:    ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   ➜ Port:    ${PORT}`);
-  console.log(`   ➜ URL:     http://localhost:${PORT}\n`);
+  console.log(`   ➜ Mode:     ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   ➜ Port:     ${PORT}`);
+  console.log(`   ➜ URL:      http://localhost:${PORT}\n`);
 });
 
 // -------------------------------------------------------
