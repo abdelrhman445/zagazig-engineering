@@ -23,29 +23,36 @@ const app = express();
 // -------------------------------------------------------
 
 /**
- * إعدادات الـ CORS الاحترافية باستخدام .env
- * تقوم بمعالجة الروابط لضمان عدم وجود مسافات أو "/" زائدة تعيق عملية التحقق
+ * إعدادات الـ CORS الاحترافية:
+ * 1. بننظف الروابط من أي "/" في الآخر.
+ * 2. بنطبع القيم في الـ Logs عشان نتأكد إن Render قاري الـ Env صح.
  */
 const corsOptions = {
   origin: function (origin, callback) {
-    // السماح بالطلبات التي ليس لها origin (مثل Postman أو السيرفرات)
+    // السماح بالطلبات بدون origin (مثل Postman)
     if (!origin) return callback(null, true);
 
-    // تحويل سلسلة الروابط من .env إلى مصفوفة نظيفة تماماً
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',').map(url => url.trim().replace(/\/$/, ''))
-      : [];
+    // جلب الروابط وتنظيفها من المسافات والـ "/" الزائدة
+    const rawAllowed = process.env.ALLOWED_ORIGINS || "";
+    const allowedOrigins = rawAllowed.split(',')
+      .map(url => url.trim().replace(/\/$/, ''));
 
-    // تنظيف الرابط القادم من المتصفح أيضاً للمقارنة الدقيقة
+    // تنظيف الرابط القادم للمقارنة
     const cleanedOrigin = origin.replace(/\/$/, '');
 
-    // التحقق: السماح في وضع التطوير أو إذا كان الرابط موجوداً في القائمة المسموحة
-    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes(cleanedOrigin)) {
+    // سطر للـ Debug في Render (هتلاقيه في الـ Logs بلون مختلف)
+    console.log(`--- [CORS Check] ---`);
+    console.log(`Incoming: ${cleanedOrigin}`);
+    console.log(`Allowed List: ${JSON.stringify(allowedOrigins)}`);
+
+    const isAllowed = process.env.NODE_ENV !== 'production' || allowedOrigins.includes(cleanedOrigin);
+    
+    if (isAllowed) {
+      console.log(`✅ Access Granted`);
       callback(null, true);
     } else {
-      // طباعة الخطأ في الـ Logs لمعرفة الرابط المرفوض بالضبط
-      console.error(`❌ CORS Error: Origin ${origin} is not allowed by configuration.`);
-      callback(new Error('Not allowed by CORS'));
+      console.error(`❌ Access Denied: ${origin} not in allowed list.`);
+      callback(new Error(`❌ CORS Error: Origin ${origin} is not allowed by configuration.`));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -57,13 +64,13 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Parse incoming JSON request bodies
-app.use(express.json({ limit: '10kb' })); // Limit body size for security
+app.use(express.json({ limit: '10kb' })); 
 
 // Parse URL-encoded bodies (form data)
 app.use(express.urlencoded({ extended: true }));
 
 // -------------------------------------------------------
-// Health Check Route
+// Health Check Routes
 // -------------------------------------------------------
 app.get('/', (req, res) => {
   res.status(200).json({
@@ -91,7 +98,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/links', linkRoutes);
 
 // -------------------------------------------------------
-// 404 Handler — Catch unmatched routes
+// 404 Handler
 // -------------------------------------------------------
 app.use((req, res) => {
   res.status(404).json({
@@ -101,7 +108,7 @@ app.use((req, res) => {
 });
 
 // -------------------------------------------------------
-// Global Error Handler (must be last middleware)
+// Global Error Handler
 // -------------------------------------------------------
 app.use(errorHandler);
 
@@ -118,7 +125,7 @@ const server = app.listen(PORT, () => {
 });
 
 // -------------------------------------------------------
-// Handle Unhandled Promise Rejections & Uncaught Exceptions
+// Process Handlers
 // -------------------------------------------------------
 process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection at:', promise, 'Reason:', reason);
